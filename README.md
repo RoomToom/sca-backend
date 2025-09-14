@@ -133,29 +133,57 @@ docker run -p 8000:8000 sca-backend
 docker build -t sca-frontend -f Dockerfile.frontend ./src
 docker run -p 3000:3000 sca-frontend
 ```
+## 📚 Endpoints overview
 
------
+Base URL: `${NEXT_PUBLIC_API_URL}` (e.g. `http://localhost:8000`)
 
-## ✅ Requirements covered (per test task)
+All responses are JSON. Validation errors return structured messages with proper HTTP codes.
 
-### Backend
+### 🐱 Cats
 
-  * REST API with FastAPI ✅
-  * SQLite DB ✅
-  * CRUD for cats ✅
-  * Missions with targets, validation rules ✅
-  * Validation with TheCatAPI ✅
-  * Pytest tests ✅
-  * Postman collection with positive & negative cases ✅
+| Method | Path                 | Body (JSON)                                                                 | Success |
+|-------:|----------------------|-----------------------------------------------------------------------------|---------|
+| GET    | `/api/v1/cats`       | —                                                                           | 200 List of cats |
+| GET    | `/api/v1/cats/{id}`  | —                                                                           | 200 Cat |
+| POST   | `/api/v1/cats`       | `{ "name": "Tom", "years_experience": 3, "breed": "Abyssinian", "salary": 1000 }` | 201 Cat |
+| PATCH  | `/api/v1/cats/{id}`  | `{ "salary": 1200 }`                                                         | 200 Cat |
+| DELETE | `/api/v1/cats/{id}`  | —                                                                           | 204 No Content |
 
-### Frontend
+**Notes**
+- `breed` is validated against TheCatAPI; unknown breeds → `422`.
+- `years_experience ≥ 0`, `salary ≥ 0`.
 
-  * Spy Cats dashboard in Next.js ✅
-  * CRUD for cats ✅
-  * Error handling ✅
-  * TailwindCSS styling (dark/light theme) ✅
+---
 
------
+### 🎯 Missions & Targets
+
+Create missions **with targets (1–3)** in one request. A cat can have **only one active mission**.
+
+| Method | Path                             | Body (JSON)                                                                                                                   | Success |
+|-------:|----------------------------------|-------------------------------------------------------------------------------------------------------------------------------|---------|
+| GET    | `/api/v1/missions`               | —                                                                                                                             | 200 List of missions |
+| GET    | `/api/v1/missions/{id}`          | —                                                                                                                             | 200 Mission |
+| POST   | `/api/v1/missions`               | `{ "targets": [{ "name":"T1", "country":"US", "notes":"..." }], "assigned_cat_id": 12 }` *(cat is optional at creation)*      | 201 Mission |
+| DELETE | `/api/v1/missions/{id}`          | —                                                                                                                             | 204 No Content (only if **unassigned**) / 400 if assigned |
+| PATCH  | `/api/v1/missions/{id}/assign`   | Query: `?cat_id=12`                                                                                                           | 200 Mission / 400 if cat busy |
+| PATCH  | `/api/v1/targets/{targetId}/notes`   | `{ "notes": "updated note" }`                                                                                             | 200 Target / 400 if target or mission completed |
+| PATCH  | `/api/v1/targets/{targetId}/complete`| —                                                                                                                          | 200 Target (mission auto-completes when all targets complete) |
+
+**Notes**
+- Creating a mission with `<1` or `>3` targets → `422`.
+- Deleting an assigned mission → `400`.
+- Updating notes after target/mission complete → `400`.
+
+---
+
+### 🔁 Typical flows
+
+**Create a cat**
+```
+curl -X POST "$BASE/api/v1/cats" \
+  -H "Content-Type: application/json" \
+  -d '{ "name":"Tom","years_experience":3,"breed":"Abyssinian","salary":1000 }'
+```
 
 ## 📸 Screenshots
 
