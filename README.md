@@ -112,7 +112,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 
 ## 🧪 Postman Tests
 
-Import `postman_collection.json` into Postman.
+Import `https://raw.githubusercontent.com/RoomToom/sca-backend/refs/heads/master/postman_collection.json` into Postman.
 Run the collection — all tests (cats, missions, targets, validations) should pass.
 
 -----
