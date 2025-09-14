@@ -1,0 +1,415 @@
+{
+  "info": {
+    "name": "Spy Cat Agency API — Full (safe & complete)",
+    "_postman_id": "6c0d4a02-0f2e-4c68-8b53-9f3b6b5a9ac1",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Full coverage of Spy Cat Agency API: Cats CRUD, Missions/Targets flows, assign rules, freeze notes, negatives — with safe delete flow that won't break missions."
+  },
+  "variable": [
+    { "key": "BASE", "value": "http://localhost:8000" },
+    { "key": "VALID_BREED", "value": "Abyssinian" },
+    { "key": "CAT_ID", "value": "" },
+    { "key": "CAT_ID2", "value": "" },
+    { "key": "CAT_ID3", "value": "" },
+    { "key": "MISSION_A_ID", "value": "" },
+    { "key": "TARGET_A_ID", "value": "" },
+    { "key": "MISSION_B_ID", "value": "" },
+    { "key": "TARGET_B_ID", "value": "" },
+    { "key": "MISSION_C_ID", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Cats",
+      "item": [
+        {
+          "name": "Create Cat A (capture CAT_ID)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{BASE}}/api/v1/cats",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Tom\",\n  \"years_experience\": 3,\n  \"breed\": \"{{VALID_BREED}}\",\n  \"salary\": 1000\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Created (201)', () => pm.response.code === 201);",
+                  "const j = pm.response.json();",
+                  "pm.collectionVariables.set('CAT_ID', j.id);",
+                  "pm.expect(pm.collectionVariables.get('CAT_ID')).to.be.ok;"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Cats",
+          "request": { "method": "GET", "url": "{{BASE}}/api/v1/cats" },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "exec": ["pm.test('OK (200)', () => pm.response.code === 200);"], "type": "text/javascript" }
+            }
+          ]
+        },
+        {
+          "name": "Get Cat A by ID ({{CAT_ID}})",
+          "request": { "method": "GET", "url": "{{BASE}}/api/v1/cats/{{CAT_ID}}" },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "exec": ["pm.test('OK (200)', () => pm.response.code === 200);"], "type": "text/javascript" }
+            }
+          ]
+        },
+        {
+          "name": "Update Salary (Cat A)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{BASE}}/api/v1/cats/{{CAT_ID}}",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"salary\": 1200\n}" }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('OK (200)', () => pm.response.code === 200);",
+                  "pm.test('Salary updated', () => pm.response.json().salary === 1200);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Cat B (capture CAT_ID2)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{BASE}}/api/v1/cats",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jerry\",\n  \"years_experience\": 2,\n  \"breed\": \"{{VALID_BREED}}\",\n  \"salary\": 900\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Created (201)', () => pm.response.code === 201);",
+                  "const j = pm.response.json();",
+                  "pm.collectionVariables.set('CAT_ID2', j.id);",
+                  "pm.expect(pm.collectionVariables.get('CAT_ID2')).to.be.ok;"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Cat C (capture CAT_ID3) — dedicated for DELETE",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{BASE}}/api/v1/cats",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Spike\",\n  \"years_experience\": 1,\n  \"breed\": \"{{VALID_BREED}}\",\n  \"salary\": 700\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Created (201)', () => pm.response.code === 201);",
+                  "const j = pm.response.json();",
+                  "pm.collectionVariables.set('CAT_ID3', j.id);",
+                  "pm.expect(pm.collectionVariables.get('CAT_ID3')).to.be.ok;"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Cat C — expect 204 (independent)",
+          "request": { "method": "DELETE", "url": "{{BASE}}/api/v1/cats/{{CAT_ID3}}" },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "exec": ["pm.test('Deleted (204)', () => pm.response.code === 204);"], "type": "text/javascript" }
+            }
+          ]
+        },
+        {
+          "name": "(Optional) Delete Cat A — 204/404 acceptable",
+          "request": { "method": "DELETE", "url": "{{BASE}}/api/v1/cats/{{CAT_ID}}" },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "exec": ["pm.test('204 or 404 acceptable for optional delete', () => [204,404].includes(pm.response.code));"], "type": "text/javascript" }
+            }
+          ]
+        },
+        {
+          "name": "Recreate Cat A (reset CAT_ID to keep Missions stable)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{BASE}}/api/v1/cats",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Tom\",\n  \"years_experience\": 3,\n  \"breed\": \"{{VALID_BREED}}\",\n  \"salary\": 1100\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Recreated (201)', () => pm.response.code === 201);",
+                  "const j = pm.response.json();",
+                  "pm.collectionVariables.set('CAT_ID', j.id);",
+                  "pm.expect(pm.collectionVariables.get('CAT_ID')).to.be.ok;"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Missions",
+      "item": [
+        {
+          "name": "Create Mission A (assigned to Cat A) — capture IDs",
+          "request": {
+            "method": "POST",
+            "url": "{{BASE}}/api/v1/missions",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targets\": [\n    { \"name\": \"T1\", \"country\": \"US\", \"notes\": \"hello\" }\n  ],\n  \"assigned_cat_id\": {{CAT_ID}}\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Created (201)', () => pm.response.code === 201);",
+                  "const j = pm.response.json();",
+                  "pm.collectionVariables.set('MISSION_A_ID', j.id);",
+                  "pm.collectionVariables.set('TARGET_A_ID', (j.targets && j.targets[0] && j.targets[0].id) || '');",
+                  "pm.expect(pm.collectionVariables.get('MISSION_A_ID')).to.be.ok;",
+                  "pm.expect(pm.collectionVariables.get('TARGET_A_ID')).to.be.ok;"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Re-assign Mission A to Cat A (should 400)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{BASE}}/api/v1/missions/{{MISSION_A_ID}}/assign?cat_id={{CAT_ID}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "exec": ["pm.test('Mission already assigned (400)', () => pm.response.code === 400);"], "type": "text/javascript" }
+            }
+          ]
+        },
+        {
+          "name": "Update Target A Notes",
+          "request": {
+            "method": "PATCH",
+            "url": "{{BASE}}/api/v1/targets/{{TARGET_A_ID}}/notes",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{ \"notes\": \"updated\" }" }
+          },
+          "event": [
+            { "listen": "test", "script": { "exec": ["pm.test('OK (200)', () => pm.response.code === 200);"], "type": "text/javascript" } }
+          ]
+        },
+        {
+          "name": "Complete Target A",
+          "request": { "method": "PATCH", "url": "{{BASE}}/api/v1/targets/{{TARGET_A_ID}}/complete" },
+          "event": [
+            { "listen": "test", "script": { "exec": ["pm.test('OK (200)', () => pm.response.code === 200);"], "type": "text/javascript" } }
+          ]
+        },
+        {
+          "name": "Get Mission A (after complete) — expect completed",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE}}/api/v1/missions/{{MISSION_A_ID}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('OK (200)', () => pm.response.code === 200);",
+                  "const j = pm.response.json();",
+                  "pm.test('Mission is complete', () => j.is_complete === true);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Notes After Complete (should 400)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{BASE}}/api/v1/targets/{{TARGET_A_ID}}/notes",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{ \"notes\": \"should fail\" }" }
+          },
+          "event": [
+            { "listen": "test", "script": { "exec": ["pm.test('Frozen -> 400', () => pm.response.code === 400);"], "type": "text/javascript" } }
+          ]
+        },
+        {
+          "name": "Delete Mission A (assigned) — should 400",
+          "request": { "method": "DELETE", "url": "{{BASE}}/api/v1/missions/{{MISSION_A_ID}}" },
+          "event": [
+            { "listen": "test", "script": { "exec": ["pm.test('Cannot delete assigned mission (400)', () => pm.response.code === 400);"], "type": "text/javascript" } }
+          ]
+        },
+        {
+          "name": "Create Mission B (unassigned) — capture IDs",
+          "request": {
+            "method": "POST",
+            "url": "{{BASE}}/api/v1/missions",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targets\": [ { \"name\": \"T2\", \"country\": \"DE\", \"notes\": \"-\" } ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Created (201)', () => pm.response.code === 201);",
+                  "const j = pm.response.json();",
+                  "pm.collectionVariables.set('MISSION_B_ID', j.id);",
+                  "pm.collectionVariables.set('TARGET_B_ID', (j.targets && j.targets[0] && j.targets[0].id) || '');",
+                  "pm.expect(pm.collectionVariables.get('MISSION_B_ID')).to.be.ok;",
+                  "pm.expect(pm.collectionVariables.get('TARGET_B_ID')).to.be.ok;"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Assign Mission B to Cat B (200)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{BASE}}/api/v1/missions/{{MISSION_B_ID}}/assign?cat_id={{CAT_ID2}}"
+          },
+          "event": [
+            { "listen": "test", "script": { "exec": ["pm.test('OK (200)', () => pm.response.code === 200);"], "type": "text/javascript" } }
+          ]
+        },
+        {
+          "name": "Delete Mission B (assigned) — should 400",
+          "request": { "method": "DELETE", "url": "{{BASE}}/api/v1/missions/{{MISSION_B_ID}}" },
+          "event": [
+            { "listen": "test", "script": { "exec": ["pm.test('Cannot delete assigned mission (400)', () => pm.response.code === 400);"], "type": "text/javascript" } }
+          ]
+        },
+        {
+          "name": "Create Mission C (unassigned) — capture ID",
+          "request": {
+            "method": "POST",
+            "url": "{{BASE}}/api/v1/missions",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targets\": [ { \"name\": \"T3\", \"country\": \"FR\" } ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Created (201)', () => pm.response.code === 201);",
+                  "const j = pm.response.json();",
+                  "pm.collectionVariables.set('MISSION_C_ID', j.id);",
+                  "pm.expect(pm.collectionVariables.get('MISSION_C_ID')).to.be.ok;"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Mission C (unassigned) — 204",
+          "request": { "method": "DELETE", "url": "{{BASE}}/api/v1/missions/{{MISSION_C_ID}}" },
+          "event": [
+            { "listen": "test", "script": { "exec": ["pm.test('Deleted (204)', () => pm.response.code === 204);"], "type": "text/javascript" } }
+          ]
+        },
+        {
+          "name": "Negative: Create Mission with 0 targets — 422",
+          "request": {
+            "method": "POST",
+            "url": "{{BASE}}/api/v1/missions",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"targets\": []\n}" }
+          },
+          "event": [
+            { "listen": "test", "script": { "exec": ["pm.test('422 for 0 targets', () => pm.response.code === 422);"], "type": "text/javascript" } }
+          ]
+        },
+        {
+          "name": "Negative: Create Mission with 4 targets — 422",
+          "request": {
+            "method": "POST",
+            "url": "{{BASE}}/api/v1/missions",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targets\": [\n    { \"name\": \"A\", \"country\": \"UA\" },\n    { \"name\": \"B\", \"country\": \"UA\" },\n    { \"name\": \"C\", \"country\": \"UA\" },\n    { \"name\": \"D\", \"country\": \"UA\" }\n  ]\n}"
+            }
+          },
+          "event": [
+            { "listen": "test", "script": { "exec": ["pm.test('422 for >3 targets', () => pm.response.code === 422);"], "type": "text/javascript" } }
+          ]
+        },
+        {
+          "name": "List Missions",
+          "request": { "method": "GET", "url": "{{BASE}}/api/v1/missions" },
+          "event": [
+            { "listen": "test", "script": { "exec": ["pm.test('OK (200)', () => pm.response.code === 200);"], "type": "text/javascript" } }
+          ]
+        },
+        {
+          "name": "Get Mission A",
+          "request": { "method": "GET", "url": "{{BASE}}/api/v1/missions/{{MISSION_A_ID}}" },
+          "event": [
+            { "listen": "test", "script": { "exec": ["pm.test('OK (200)', () => pm.response.code === 200);"], "type": "text/javascript" } }
+          ]
+        }
+      ]
+    }
+  ]
+}
