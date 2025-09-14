@@ -117,16 +117,6 @@ Run the collection — all tests (cats, missions, targets, validations) should p
 
 -----
 
-## 🐳 Docker
-
-### Combined (backend + frontend)
-
-`docker-compose.yml` orchestrates both services:
-
-```bash
-docker compose up --build
-```
-
 Backend → http://localhost:8000
 Frontend → http://localhost:3000
 
